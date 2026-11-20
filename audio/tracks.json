@@ -1,0 +1,116 @@
+{
+ "menu": {
+  "zh": "龍門江湖志",
+  "en": "Sects of Longmen",
+  "loop": true,
+  "dur": 71.111
+ },
+ "peace1": {
+  "zh": "山門晨鐘",
+  "en": "Morning Bell at the Sect Gate",
+  "loop": true,
+  "dur": 91.429
+ },
+ "peace2": {
+  "zh": "江湖行",
+  "en": "On the Road of the Jianghu",
+  "loop": true,
+  "dur": 73.846
+ },
+ "peace3": {
+  "zh": "茶樓聽書",
+  "en": "Tales at the Teahouse",
+  "loop": true,
+  "dur": 83.478
+ },
+ "war": {
+  "zh": "烽煙四起",
+  "en": "Beacon Smoke on Every Side",
+  "loop": true,
+  "dur": 49.231
+ },
+ "congress": {
+  "zh": "武林大會",
+  "en": "The Wulin Assembly",
+  "loop": true,
+  "dur": 76.8
+ },
+ "victory": {
+  "zh": "一統江湖",
+  "en": "The Jianghu United",
+  "loop": false,
+  "dur": 27.849
+ },
+ "defeat": {
+  "zh": "江湖夜雨",
+  "en": "Night Rain on the Jianghu",
+  "loop": false,
+  "dur": 38.28
+ },
+ "sfx_click": {
+  "zh": "木魚",
+  "en": "Woodblock",
+  "loop": false,
+  "dur": 0.549
+ },
+ "sfx_select": {
+  "zh": "撥弦",
+  "en": "Pluck",
+  "loop": false,
+  "dur": 1.1
+ },
+ "sfx_move": {
+  "zh": "腳步",
+  "en": "Steps",
+  "loop": false,
+  "dur": 0.8
+ },
+ "sfx_hit": {
+  "zh": "擊",
+  "en": "Strike",
+  "loop": false,
+  "dur": 1.1
+ },
+ "sfx_arrow": {
+  "zh": "箭",
+  "en": "Arrow",
+  "loop": false,
+  "dur": 0.682
+ },
+ "sfx_city": {
+  "zh": "立城",
+  "en": "A City Rises",
+  "loop": false,
+  "dur": 3.1
+ },
+ "sfx_turn": {
+  "zh": "更鼓",
+  "en": "Watch Drum",
+  "loop": false,
+  "dur": 0.536
+ },
+ "sfx_war": {
+  "zh": "戰鼓",
+  "en": "War Drums",
+  "loop": false,
+  "dur": 3.9
+ },
+ "sfx_gong": {
+  "zh": "鑼",
+  "en": "Gong",
+  "loop": false,
+  "dur": 2.6
+ },
+ "sfx_build": {
+  "zh": "鈴",
+  "en": "Bells",
+  "loop": false,
+  "dur": 1.694
+ },
+ "sfx_tech": {
+  "zh": "悟",
+  "en": "Insight",
+  "loop": false,
+  "dur": 1.852
+ }
+}

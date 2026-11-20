@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>龍門江湖志 Sects of Longmen</title>
+<meta name="description" content="An original turn-based hex 4X strategy game of the Longmen jianghu: found a sect, study the martial arts, set the rules and win the jianghu.">
+<meta name="theme-color" content="#2a2018">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="龍門江湖志">
+<link rel="apple-touch-icon" href="apple-touch-icon.png?v=1">
+<link rel="icon" href="icon-192.png?v=1">
+<link rel="manifest" href="manifest.webmanifest?v=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<div id="app">
+  <canvas id="map"></canvas>
+  <div id="hud" hidden>
+    <header id="top">
+      <div id="sectBadge"></div>
+      <div id="yields"></div>
+      <div id="date"></div>
+      <nav id="nav">
+        <button data-screen="tech" title="R">武學<i>Arts</i></button>
+        <button data-screen="rules" title="C">門規<i>Rules</i></button>
+        <button data-screen="diplo" title="P">外交<i>Diplomacy</i></button>
+        <button data-screen="congress" id="btnCongress">大會<i>Assembly</i></button>
+        <button data-screen="villages" id="btnVillages">村寨<i>Villages</i></button>
+        <button data-screen="heroes" id="btnHeroes">俠客<i>Heroes</i></button>
+        <button data-screen="overview">大勢<i>Overview</i></button>
+        <button data-screen="menu" class="menu">≡</button>
+      </nav>
+    </header>
+    <div id="prog"></div>
+    <div id="notes"></div>
+    <div id="unitPanel" hidden></div>
+    <div id="attackBox" hidden></div>
+
+    <div id="rightCol">
+  <div id="mapBtns">
+      <button id="zoomIn" title="+">＋</button><button id="zoomOut" title="-">－</button><button id="homeBtn" title="H">⌂</button><button id="yieldBtn" title="Y">產</button>
+    </div>
+      <canvas id="mini"></canvas>
+      <div class="endrow"><button id="endForce" title="Shift+Enter" hidden>⏭</button><button id="endBtn" class="end"></button></div>
+    </div>
+    <aside id="cityPanel" hidden></aside>
+  </div>
+  <div id="title" hidden></div>
+  <div id="modal" hidden></div>
+  <div id="tip" hidden></div>
+  <div id="busy" hidden></div>
+  <div id="toast" hidden></div>
+  <div id="loading">龍門江湖志 · Sects of Longmen …</div>
+</div>
+<script type="module" src="js/main.js?v=1"></script>
+</body>
+</html>

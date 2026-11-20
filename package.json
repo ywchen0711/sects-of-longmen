@@ -1,0 +1,7 @@
+{
+  "name": "sects-of-longmen",
+  "private": true,
+  "type": "module",
+  "description": "Sects of Longmen - an original hex 4X strategy game of the Longmen jianghu",
+  "scripts": { "test": "node test/aigame.mjs" }
+}

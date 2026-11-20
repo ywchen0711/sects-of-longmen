@@ -1,0 +1,56 @@
+// Language: every game text is a [zh, en] pair. The choice is remembered per browser.
+let lang = 'zh';
+try { const s = localStorage.getItem('sol_lang'); if (s === 'en' || s === 'zh') lang = s; else if (!/^zh/i.test(navigator.language || 'zh')) lang = 'en'; } catch (e) {}
+export function getLang() { return lang; }
+export function setLang(l) { lang = l; try { localStorage.setItem('sol_lang', l); } catch (e) {} document.documentElement.lang = l === 'zh' ? 'zh-Hant' : 'en'; }
+export function L(p) { if (!p) return ''; if (typeof p === 'string') return p; return lang === 'zh' ? p[0] : p[1]; }
+export function T(k, ...a) { const p = S[k]; if (!p) return k; let s = lang === 'zh' ? p[0] : p[1]; a.forEach((v, i) => { s = s.replace('{' + i + '}', v); }); return s; }
+
+const S = {
+  title: ['龍門江湖志', 'Sects of Longmen'],
+  subtitle: ['開宗立派・逐鹿江湖', 'Found a sect. Win the jianghu.'],
+  newGame: ['開宗立派', 'New Game'], cont: ['繼續', 'Continue'], load: ['讀取', 'Load'], settings: ['設定', 'Settings'], help: ['說明', 'How to Play'],
+  credits: ['製作群', 'Credits'], back: ['返回', 'Back'], start: ['出發', 'Begin'], close: ['關閉', 'Close'], ok: ['好', 'OK'], cancel: ['取消', 'Cancel'],
+  yes: ['是', 'Yes'], no: ['否', 'No'], confirm: ['確定', 'Confirm'],
+  chooseSect: ['選擇門派', 'Choose your sect'], mapSize: ['地圖大小', 'Map size'], mapType: ['地形', 'Map type'], rivals: ['對手數', 'Rivals'],
+  difficulty: ['難度', 'Difficulty'], speed: ['速度', 'Speed'], seed: ['種子', 'Seed'], random: ['隨機', 'Random'],
+  ability: ['門派絕學', 'Sect ability'], uu: ['獨門弟子', 'Unique unit'], ub: ['獨門建築', 'Unique building'], leader: ['掌門', 'Leader'],
+  endTurn: ['結束回合', 'End Turn'], nextUnit: ['下一個單位', 'Next Unit'], chooseResearch: ['選擇武學', 'Choose Research'],
+  chooseCivic: ['選擇門規', 'Choose a Rule'], chooseBuild: ['選擇生產', 'Choose Production'], promote: ['晉升', 'Promote'],
+  waitAI: ['各派行動中…', 'The sects are moving...'], turn: ['回合', 'Turn'], year: ['龍門紀年 {0} 年・{1}', 'Year {0} of Longmen, {1}'],
+  gold: ['銀兩', 'Silver'], insight: ['武學', 'Insight'], renown: ['俠名', 'Renown'], legend: ['傳奇', 'Legend'], favour: ['人情', 'Favour'],
+  research: ['武學', 'Martial Arts'], rules: ['門規', 'Sect Rules'], diplomacy: ['外交', 'Diplomacy'], congress: ['武林大會', 'Wulin Assembly'],
+  villages: ['村寨', 'Villages'], overview: ['大勢', 'Overview'], heroes: ['俠客', 'Heroes'], menu: ['選單', 'Menu'],
+  fortify: ['駐守', 'Fortify'], sleep: ['休息', 'Sleep'], skip: ['略過', 'Skip'], found: ['開宗立派', 'Found City'], disband: ['解散', 'Disband'],
+  upgrade: ['升級', 'Upgrade'], attack: ['攻擊', 'Attack'], ranged: ['遠攻', 'Ranged'], activate: ['施展', 'Activate'], route: ['開鏢路', 'Open Route'],
+  autoRoute: ['自動走鏢', 'Auto Route'], move: ['移動', 'Move'], cancelOrder: ['取消命令', 'Cancel Order'], wake: ['喚醒', 'Wake'],
+  strength: ['戰力', 'Strength'], rstrength: ['遠程', 'Ranged'], moves: ['行動', 'Moves'], hp: ['氣血', 'Health'], xp: ['經驗', 'Experience'], level: ['等級', 'Level'],
+  city: ['城市', 'City'], pop: ['人口', 'Population'], production: ['生產', 'Production'], buy: ['購買', 'Buy'], buildings: ['建築', 'Buildings'],
+  focus: ['重點', 'Focus'], growth: ['成長', 'Growth'], turns: ['{0} 回合', '{0} turns'], nturns: ['{0}回合', '{0}t'], defense: ['防禦', 'Defence'],
+  strike: ['城市射擊', 'City Strike'], wonders: ['奇觀', 'Wonders'], units: ['部隊', 'Units'], projects: ['神功', 'Peerless Art'], queue: ['排程', 'Queue'],
+  f_bal: ['均衡', 'Balanced'], f_food: ['糧', 'Food'], f_prod: ['產', 'Production'], f_gold: ['銀', 'Silver'], f_sci: ['武學', 'Insight'], f_cul: ['俠名', 'Renown'],
+  war: ['交戰', 'At war'], peace: ['和平', 'At peace'], ally: ['同盟', 'Allied'], declareWar: ['宣戰', 'Declare War'], makePeace: ['議和', 'Propose Peace'],
+  proposeAlly: ['結盟', 'Propose Alliance'], pact: ['互市', 'Trade Pact'], gift: ['贈銀 50', 'Gift 50 silver'], denounce: ['譴責', 'Denounce'],
+  attitude: ['態度', 'Attitude'], warConfirm: ['真的要向{0}宣戰嗎？江湖會記住是誰先動手的。', 'Declare war on {0}? The jianghu will remember who struck first.'],
+  attackConfirm: ['攻擊{0}就是宣戰。確定嗎？', 'Attacking {0} means war. Are you sure?'],
+  notMet: ['尚未結識', 'Not met yet'], votes: ['票數', 'Votes'], buyVotes: ['以人情買票', 'Buy votes with favour'], leaderVote: ['推舉盟主', 'Nominate the Alliance Leader'],
+  vote: ['投票', 'Cast Votes'], option: ['選項', 'Option'], target: ['對象', 'Target'], nextCongress: ['下屆大會：第 {0} 回合', 'Next Assembly: turn {0}'],
+  envoys: ['使者', 'Envoys'], sendEnvoy: ['派遣使者', 'Send Envoy'], patron: ['盟主', 'Patron'], recruit: ['招募', 'Recruit'], cost: ['花費', 'Cost'],
+  victory: ['勝利', 'Victory'], defeat: ['落敗', 'Defeat'], score: ['分數', 'Score'], save: ['儲存', 'Save'], saved: ['已儲存', 'Saved'], slot: ['存檔 {0}', 'Slot {0}'],
+  autosave: ['自動存檔', 'Autosave'], empty: ['（空）', '(empty)'], quit: ['回到標題', 'Back to Title'], music: ['音樂', 'Music'], sfx: ['音效', 'Sound'],
+  language: ['語言', 'Language'], anim: ['動畫', 'Animations'], autoStrike: ['城市自動射擊', 'Cities strike automatically'], on: ['開', 'On'], off: ['關', 'Off'],
+  summary: ['上一季的消息', 'Last season'], noNews: ['江湖風平浪靜。', 'All quiet in the jianghu.'], government: ['門派體制', 'Constitution'], policies: ['門規', 'Rules'],
+  slots: ['欄位', 'Slots'], current: ['進行中', 'In progress'], learned: ['已領悟', 'Learned'], available: ['可研習', 'Available'], locked: ['未解鎖', 'Locked'],
+  unlocks: ['解鎖', 'Unlocks'], requires: ['需要', 'Requires'], progress: ['進度', 'Progress'], none: ['無', 'None'], tile: ['地塊', 'Tile'], owner: ['屬於', 'Owner'],
+  river: ['河流', 'River'], yields: ['產出', 'Yields'], resource: ['資源', 'Resource'], improvement: ['改良', 'Improvement'], unexplored: ['未探索', 'Unexplored'],
+  watch: ['觀戰', 'Spectate'], greatPeople: ['奇人', 'Great People'], points: ['點數', 'points'], tales: ['傳奇著作', 'Legends written'],
+  routes: ['鏢路', 'Escort routes'], proposal: ['來使', 'An envoy arrives'], accept: ['答應', 'Accept'], decline: ['婉拒', 'Decline'],
+  victoryTypes: ['勝利條件', 'Victory conditions'], youWin: ['你贏得了江湖！', 'The jianghu is yours!'], youLose: ['江湖另有霸主。', 'Another sect rules the jianghu.'],
+  keepPlaying: ['繼續看下去', 'Keep watching'], newAfter: ['再開一局', 'Play again'], loading: ['載入中…', 'Loading...'],
+  zoomIn: ['放大', 'Zoom in'], zoomOut: ['縮小', 'Zoom out'], center: ['回到據點', 'Centre on home'], mini: ['小地圖', 'Minimap'],
+  confirmMove: ['再點一次確認移動', 'Tap again to move'], turnsAway: ['{0} 回合可到', '{0} turn(s) away'], cannotReach: ['到不了', "Can't get there"],
+  predicted: ['預估', 'Expected'], dmgTo: ['對方 -{0}', 'Them -{0}'], dmgFrom: ['我方 -{0}', 'Us -{0}'], embarked: ['乘船', 'Embarked'],
+  allAI: ['全電腦對戰', 'All-computer game'], resolutions: ['決議', 'Resolutions'], results: ['結果', 'Results'], standing: ['盟主聲望', 'Leader standing'],
+  heroCost: ['招募俠客需要 {0} 俠名（目前 {1}）', 'Recruiting costs {0} renown (you have {1})'], noHeroes: ['目前沒有可以招募的俠客。', 'No heroes are free right now.'],
+  inCity: ['在城中', 'in city'], tapCity: ['點兩下城市可開啟城市面板', 'Tap a city twice to open it'],
+};
