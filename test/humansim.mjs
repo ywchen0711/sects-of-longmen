@@ -2,11 +2,11 @@
 // (found cities, research and rule paths, policies, production and buying, moving and attacking, heroes,
 // envoys, great people, escort routes, diplomacy, Assembly votes, save/load) against computer sects.
 // usage: node test/humansim.mjs [seed] [turns]
-import * as C from '../js/core.js?v=2';
-import * as U from '../js/units.js?v=2';
-import * as W from '../js/world.js?v=2';
-import { aiTurn } from '../js/ai.js?v=2';
-import { UNITS, TECHS } from '../js/data.js?v=2';
+import * as C from '../js/core.js?v=3';
+import * as U from '../js/units.js?v=3';
+import * as W from '../js/world.js?v=3';
+import { aiTurn } from '../js/ai.js?v=3';
+import { UNITS, TECHS } from '../js/data.js?v=3';
 
 const [seed = 'hs1', turns = '160'] = process.argv.slice(2);
 let G = C.newGame({ seed, size: 'small', speed: 'quick', players: 4, sect: 'longmen', difficulty: 1 });

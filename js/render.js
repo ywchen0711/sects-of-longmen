@@ -1,10 +1,10 @@
 // The map: an ink-and-colour painted scroll. Terrain is painted once into cached chunks (per zoom bucket);
 // fog, borders, cities, units and effects are drawn on top only when something changes or animates.
-import { TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMP_IDS, SECTS, UNITS, BUILDINGS } from './data.js?v=2';
-import { center, corner, pick, EDGE, SQ3, dirTable } from './hex.js?v=2';
-import { cityAt, unitsAt, udef, isMilitary, tileOwner, heroDef, resVisible, cityMaxHp, cityTiles } from './core.js?v=2';
-import { KEY, SPR, POR } from './art.js?v=2';
-import { L } from './i18n.js?v=2';
+import { TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMP_IDS, SECTS, UNITS, BUILDINGS } from './data.js?v=3';
+import { center, corner, pick, EDGE, SQ3, dirTable } from './hex.js?v=3';
+import { cityAt, unitsAt, udef, isMilitary, tileOwner, heroDef, resVisible, cityMaxHp, cityTiles } from './core.js?v=3';
+import { KEY, SPR, POR } from './art.js?v=3';
+import { L } from './i18n.js?v=3';
 
 export const S = 32;            // hex radius in map units
 const CH = 512;                  // chunk size in map units

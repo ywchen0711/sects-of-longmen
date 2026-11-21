@@ -1,13 +1,13 @@
 // Units: movement (costs, zones of control, embarking), pathfinding, combat, capture, promotions,
 // great people, heroes, escort routes and envoys.
-import { UNITS, TERRAIN, BUILDINGS, WONDERS, HEROES, GREAT, PROMOS, SECTS, TECHS, VILLAGE_KINDS, ENVOY_TIERS, RESOURCES } from './data.js?v=2';
+import { UNITS, TERRAIN, BUILDINGS, WONDERS, HEROES, GREAT, PROMOS, SECTS, TECHS, VILLAGE_KINDS, ENVOY_TIERS, RESOURCES } from './data.js?v=3';
 import {
   note, sectName, ter, terDef, isWater, isLandPassable, cityAt, villageAt, campAt, unitsAt, tileOwner, addAt, removeAt, mods, udef,
   isMilitary, makeUnit, killUnit, heroDef, maxMoves, canStack, checkLevel, updateVis, revealAround, refreshMods, cityTiles, assignWork,
   cityMaxHp, costMul, NEUTRAL_POOL, spawnNear, cityById, eraOf, foundCity, canFound, worldEra, techCost, itemCost, learnTech, hasBld,
-} from './core.js?v=2';
-import { within, dist } from './hex.js?v=2';
-import { rnd, rint } from './rng.js?v=2';
+} from './core.js?v=3';
+import { within, dist } from './hex.js?v=3';
+import { rnd, rint } from './rng.js?v=3';
 
 // ------------------------------------------------------------------ relations
 export function atWar(G, a, b) {
@@ -630,7 +630,7 @@ export function upgradeTarget(G, u) {
   if (T.res && !(p.sect === 'yuyao' && t === 'u_yy_tiger')) { const { hasResource } = CORE; if (!hasResource(G, p, T.res)) return null; }
   return t;
 }
-import * as CORE from './core.js?v=2';
+import * as CORE from './core.js?v=3';
 export function upgradeCost(G, u, t) { return Math.round(((UNITS[t].cost - udef(u).cost) * 1.6 + 15) * costMul(G)); }
 export function upgradeUnit(G, u) {
   const t = upgradeTarget(G, u); if (!t) return false;

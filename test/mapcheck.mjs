@@ -1,5 +1,5 @@
-import { generate } from '../js/mapgen.js?v=2';
-import { TERRAIN_IDS } from '../js/data.js?v=2';
+import { generate } from '../js/mapgen.js?v=3';
+import { TERRAIN_IDS } from '../js/data.js?v=3';
 const type = process.argv[2] || 'pangaea';
 const m = generate({ w: 58, h: 36, seed: process.argv[3] || 'abc', type, players: 6, villages: 6, camps: 8 });
 const ch = { grass: '"', plains: '.', hills: 'n', mountain: 'A', forest: 'T', bamboo: 'b', marsh: 'm', snow: '*', desert: ':', lake: 'o', coast: '~', sea: ' ' };

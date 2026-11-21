@@ -1,8 +1,8 @@
 // AI-vs-AI full game in fast mode. usage: node test/aigame.mjs [seed] [size] [speed] [players] [mapType]
-import { newGame, serialize, deserialize } from '../js/core.js?v=2';
-import { runWholeTurn, score, victoryProgress } from '../js/world.js?v=2';
-import { aiTurn } from '../js/ai.js?v=2';
-import { SECTS, VICTORIES } from '../js/data.js?v=2';
+import { newGame, serialize, deserialize } from '../js/core.js?v=3';
+import { runWholeTurn, score, victoryProgress } from '../js/world.js?v=3';
+import { aiTurn } from '../js/ai.js?v=3';
+import { SECTS, VICTORIES } from '../js/data.js?v=3';
 const [seed = 's1', size = 'small', speed = 'blitz', players = '4', mapType = 'pangaea'] = process.argv.slice(2);
 const t0 = Date.now();
 let G = newGame({ seed, size, speed, players: +players, mapType, allAI: true, difficulty: 1 });

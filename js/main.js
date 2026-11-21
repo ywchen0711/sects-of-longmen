@@ -1,13 +1,13 @@
 // Boot: assets, title and setup screens, saves, settings, map input and the render loop.
-import { SECTS, SECT_IDS, UNITS, BUILDINGS, DIFFICULTY, SIZES, MAPTYPES, SPEEDS, VICTORIES, ALIGN } from './data.js?v=2';
-import * as C from './core.js?v=2';
-import * as W from './world.js?v=2';
-import * as U from './units.js?v=2';
-import { aiTurn } from './ai.js?v=2';
-import { MapView } from './render.js?v=2';
-import { UI } from './ui.js?v=2';
-import { Sound } from './audio.js?v=2';
-import { L, T, getLang, setLang } from './i18n.js?v=2';
+import { SECTS, SECT_IDS, UNITS, BUILDINGS, DIFFICULTY, SIZES, MAPTYPES, SPEEDS, VICTORIES, ALIGN } from './data.js?v=3';
+import * as C from './core.js?v=3';
+import * as W from './world.js?v=3';
+import * as U from './units.js?v=3';
+import { aiTurn } from './ai.js?v=3';
+import { MapView } from './render.js?v=3';
+import { UI } from './ui.js?v=3';
+import { Sound } from './audio.js?v=3';
+import { L, T, getLang, setLang } from './i18n.js?v=3';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
