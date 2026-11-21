@@ -1,12 +1,12 @@
 // The flow of a turn, diplomacy, the Wulin Assembly, outlaws and beasts, victory and score.
-import { SECTS, UNITS, RESOLUTIONS, RES_IDS2, ALIGN, WONDERS, VICTORIES, TECHS, CIVICS, SPEEDS } from './data.js?v=1';
+import { SECTS, UNITS, RESOLUTIONS, RES_IDS2, ALIGN, WONDERS, VICTORIES, TECHS, CIVICS, SPEEDS } from './data.js?v=2';
 import {
   note, sectName, leaderName, beginTurnAll, refreshMods, mods, udef, isMilitary, unitsAt, cityAt, tileOwner, makeUnit, killUnit,
   NEUTRAL_POOL, spawnNear, isLandPassable, cityById, costMul, alivePlayers, speed, worldEra, updateVis, campAt, villageAt,
-} from './core.js?v=1';
-import { atWar, hostileUnit, findPath, moveAlong, attack, canAttackTile, predict, addGriev, cityTargets, cityStrike, inZOC, stepUnit, canEnter } from './units.js?v=1';
-import { within, dist } from './hex.js?v=1';
-import { rnd, rint, shuffle } from './rng.js?v=1';
+} from './core.js?v=2';
+import { atWar, hostileUnit, findPath, moveAlong, attack, canAttackTile, predict, addGriev, cityTargets, cityStrike, inZOC, stepUnit, canEnter } from './units.js?v=2';
+import { within, dist } from './hex.js?v=2';
+import { rnd, rint, shuffle } from './rng.js?v=2';
 
 // ------------------------------------------------------------------ diplomacy
 export function treatyAge(G, a, b) { return G.turn - (G.players[a].relT[b] ?? -99); }
@@ -59,7 +59,7 @@ function bounceHome(G, u) {
   }
   if (best >= 0) { const { removeAt, addAt } = CORE; removeAt(G, u); u.i = best; addAt(G, u); }
 }
-import * as CORE from './core.js?v=1';
+import * as CORE from './core.js?v=2';
 export function canAlly(G, a, b) {
   const A = G.players[a], B = G.players[b];
   return A.rel[b] === 'peace' && A.civics.c_sworn && B.civics.c_sworn;
@@ -505,7 +505,7 @@ function CORE_check(G, p) {
   const { checkElimination } = UNITS_MOD;
   checkElimination(G, p);
 }
-import * as UNITS_MOD from './units.js?v=1';
+import * as UNITS_MOD from './units.js?v=2';
 export function runWholeTurn(G, ai) {
   for (const s of turnSteps(G, ai)) { if (G.over) break; s.run(); }
 }

@@ -1,19 +1,19 @@
 // Computer sects. They play by the same rules as the human (difficulty bonuses are only the yield
 // percentages listed in the setup screen). Personality comes from each leader (data.js SECTS[..].pers).
-import { SECTS, UNITS, BUILDINGS, WONDERS, PROJECTS, TECHS, CIVICS, GOVS, POLICIES, VILLAGE_KINDS, DIFFICULTY, PROMOS } from './data.js?v=1';
+import { SECTS, UNITS, BUILDINGS, WONDERS, PROJECTS, TECHS, CIVICS, GOVS, POLICIES, VILLAGE_KINDS, DIFFICULTY, PROMOS } from './data.js?v=2';
 import {
   mods, udef, isMilitary, unitsAt, cityAt, villageAt, campAt, tileOwner, cityById, buildOptions, setBuild, itemCost, itemRate, cityYield,
   buyCost, buyItem, availableTechs, availableCivics, techCost, civicCost, unlockedGovs, unlockedPolicies, setGov, setPolicies,
   canFound, tileYield, isLandPassable, terDef, resOf, cityTiles, isWater, maxMoves, hasBld, costMul, cityCoastal, alivePlayers, ter, eraOf,
-} from './core.js?v=1';
+} from './core.js?v=2';
 import {
   findPath, moveAlong, attack, canAttackTile, predict, hostileUnit, atWar, canRanged, rangeOf, settle, canSettle, activateGP, canActivateGP,
   nearestOwnCity, routeTargets, establishRoute, routeCap, recruitHero, availableHeroes, heroCost, sendEnvoy, promoOptions, promote,
   upgradeTarget, upgradeCost, upgradeUnit, cityTargets, cityStrike, baseStr, stepUnit, canEnter, inZOC, cityStr,
-} from './units.js?v=1';
-import { declareWar, makePeace, makeAlliance, makePact, canAlly, canPact, aiConsider, attitude, militaryPower, treatyAge, canDeclareWar, score, denounce } from './world.js?v=1';
-import { within, dist } from './hex.js?v=1';
-import { rnd, rint } from './rng.js?v=1';
+} from './units.js?v=2';
+import { declareWar, makePeace, makeAlliance, makePact, canAlly, canPact, aiConsider, attitude, militaryPower, treatyAge, canDeclareWar, score, denounce } from './world.js?v=2';
+import { within, dist } from './hex.js?v=2';
+import { rnd, rint } from './rng.js?v=2';
 
 export function aiTurn(G, pid) {
   const p = G.players[pid];
@@ -570,7 +570,7 @@ function predictFrom(G, u, from, j) {
   try { pr = predict(G, u, j); } finally { removeAt(G, u); u.i = save; addAt(G, u); u.mv = sm; }
   return pr || {};
 }
-import * as CORE from './core.js?v=1';
+import * as CORE from './core.js?v=2';
 
 // ------------------------------------------------------------------ cities
 function cityAct(G, p, c, ctx) {

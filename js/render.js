@@ -1,10 +1,10 @@
 // The map: an ink-and-colour painted scroll. Terrain is painted once into cached chunks (per zoom bucket);
 // fog, borders, cities, units and effects are drawn on top only when something changes or animates.
-import { TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMP_IDS, SECTS, UNITS, BUILDINGS } from './data.js?v=1';
-import { center, corner, pick, EDGE, SQ3, dirTable } from './hex.js?v=1';
-import { cityAt, unitsAt, udef, isMilitary, tileOwner, heroDef, resVisible, cityMaxHp, cityTiles } from './core.js?v=1';
-import { KEY, SPR, POR } from './art.js?v=1';
-import { L } from './i18n.js?v=1';
+import { TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMP_IDS, SECTS, UNITS, BUILDINGS } from './data.js?v=2';
+import { center, corner, pick, EDGE, SQ3, dirTable } from './hex.js?v=2';
+import { cityAt, unitsAt, udef, isMilitary, tileOwner, heroDef, resVisible, cityMaxHp, cityTiles } from './core.js?v=2';
+import { KEY, SPR, POR } from './art.js?v=2';
+import { L } from './i18n.js?v=2';
 
 export const S = 32;            // hex radius in map units
 const CH = 512;                  // chunk size in map units
@@ -157,42 +157,41 @@ export class MapView {
       g.strokeStyle = t === 'sea' ? 'rgba(40,80,100,0.35)' : 'rgba(60,110,120,0.3)'; g.lineWidth = 1.1;
       const n = t === 'sea' ? 2 : 1;
       for (let k = 0; k < n; k++) {
-        const wx = x + (hash(i, 10 + k) - 0.5) * S * 1.1, wy = y + (hash(i, 20 + k) - 0.5) * S * 0.9;
+        const v = (i + ((i / m.w) | 0)) % 2, wx = x + (n === 1 ? (v ? 6 : -6) : (k ? 9 : -9)), wy = y + (n === 1 ? (v ? -5 : 5) : (k ? 7 : -6));
         g.beginPath(); g.moveTo(wx - 7, wy); g.quadraticCurveTo(wx - 3.5, wy - 4, wx, wy); g.quadraticCurveTo(wx + 3.5, wy - 4, wx + 7, wy); g.stroke();
       }
     }
     // grid
     g.strokeStyle = 'rgba(70,50,30,0.13)'; g.lineWidth = 0.8;
     for (const i of tiles) { const [x, y] = this.tileXY(i); hexPath(g, x, y, S); g.stroke(); }
-    // coastlines: ink on the land side, pale foam on the water side
+    // coastlines: one ink line exactly on the shared hex edge, pale foam of one width on the water side (clipped)
+    const coast = new Path2D(), sea = new Path2D(); let anyCoast = false;
     for (const i of tiles) {
-      const t = tname(i); if (TERRAIN[t].water) continue;
-      const [x, y] = this.tileXY(i);
+      const t = tname(i); const [x, y] = this.tileXY(i);
+      if (TERRAIN[t].water) { addHex(sea, x, y, S + 0.5); continue; }
       for (let d = 0; d < 6; d++) {
         const j = DT[i * 6 + d]; if (j < 0 || !TERRAIN[tname(j)].water) continue;
         const [a, b] = EDGE[d]; const [ax, ay] = corner(a, S), [bx, by] = corner(b, S);
-        g.strokeStyle = 'rgba(255,255,250,0.55)'; g.lineWidth = 4;
-        g.beginPath(); g.moveTo(x + ax * 1.07, y + ay * 1.07); g.lineTo(x + bx * 1.07, y + by * 1.07); g.stroke();
-        g.strokeStyle = INK; g.lineWidth = 1.6;
-        g.beginPath(); g.moveTo(x + ax, y + ay); g.lineTo(x + bx, y + by); g.stroke();
+        coast.moveTo(x + ax, y + ay); coast.lineTo(x + bx, y + by); anyCoast = true;
       }
     }
-    // rivers
+    if (anyCoast) {
+      g.save(); g.clip(sea); g.lineCap = 'round'; g.strokeStyle = 'rgba(255,255,250,0.55)'; g.lineWidth = 7; g.stroke(coast); g.restore();
+      g.lineCap = 'round'; g.strokeStyle = INK; g.lineWidth = 1.6; g.stroke(coast);
+    }
+    // rivers: straight runs from hex centre to hex centre (one bank colour, one water colour, uniform widths)
     g.lineCap = 'round'; g.lineJoin = 'round';
-    for (const i of tiles) {
-      if (!m.river[i]) continue;
-      const [x, y] = this.tileXY(i);
-      const d = m.rdir[i]; if (d === 255) continue;
-      const j = DT[i * 6 + d]; if (j < 0) continue;
-      const [jx, jy] = this.tileXY(j);
-      let ex = jx, ey = jy;
-      if (!m.river[j]) { ex = (x + jx) / 2; ey = (y + jy) / 2; }
-      const wob = (hash(i, 5) - 0.5) * 12;
-      const mx = (x + ex) / 2 + wob * (ey - y) / S * 0.3, my = (y + ey) / 2 - wob * (ex - x) / S * 0.3;
-      g.strokeStyle = '#3e6f86'; g.lineWidth = 5.2;
-      g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(mx, my, ex, ey); g.stroke();
-      g.strokeStyle = '#7fb5c8'; g.lineWidth = 3;
-      g.beginPath(); g.moveTo(x, y); g.quadraticCurveTo(mx, my, ex, ey); g.stroke();
+    for (const [col, lw] of [['#3e6f86', 5.2], ['#7fb5c8', 3]]) {
+      g.strokeStyle = col; g.lineWidth = lw; g.beginPath();
+      for (const i of tiles) {
+        if (!m.river[i]) continue;
+        const d = m.rdir[i]; if (d === 255) continue;
+        const j = DT[i * 6 + d]; if (j < 0) continue;
+        const [x, y] = this.tileXY(i), [jx, jy] = this.tileXY(j);
+        const ex = m.river[j] ? jx : (x + jx) / 2, ey = m.river[j] ? jy : (y + jy) / 2;
+        g.moveTo(x, y); g.lineTo(ex, ey);
+      }
+      g.stroke();
     }
     // roads
     g.setLineDash([4, 4]); g.strokeStyle = 'rgba(110,70,40,0.75)'; g.lineWidth = 2.2;
@@ -274,25 +273,34 @@ export class MapView {
     g.fillStyle = '#e6dabb'; g.fill(unex);
     g.save(); g.clip(unex); g.globalAlpha = 0.9; g.fillStyle = g.createPattern(this.cloud, 'repeat'); g.fill(unex); g.restore();
   }
+  // territory: one fill per sect (no seams between hexes) and a border that runs exactly along the outer hex edges,
+  // clipped to the inside so it is the same width everywhere and turns every corner cleanly
   drawBorders(g, tiles) {
-    const G = this.G, m = G.map, DT = dirTable(m.w, m.h);
+    const G = this.G, m = G.map, DT = dirTable(m.w, m.h), by = new Map();
     for (const i of tiles) {
       if (!this.seen(i)) continue;
       const o = tileOwner(G, i); if (o < 0) continue;
-      const col = G.players[o].col;
+      let e = by.get(o); if (!e) { e = { area: new Path2D(), edge: new Path2D(), any: false }; by.set(o, e); }
       const [x, y] = this.tileXY(i);
-      g.fillStyle = rgba(col, 0.13); hexPath(g, x, y, S); g.fill();
+      addHex(e.area, x, y, S);
       for (let d = 0; d < 6; d++) {
         const j = DT[i * 6 + d];
         if (j >= 0 && tileOwner(G, j) === o) continue;
-        const [a, b] = EDGE[d]; const [ax, ay] = corner(a, S * 0.9), [bx, by] = corner(b, S * 0.9);
-        g.strokeStyle = rgba(col, 0.9); g.lineWidth = 3;
-        g.beginPath(); g.moveTo(x + ax, y + ay); g.lineTo(x + bx, y + by); g.stroke();
-        g.strokeStyle = 'rgba(255,250,235,0.6)'; g.lineWidth = 1;
-        const [cx2, cy2] = corner(a, S * 0.82), [dx2, dy2] = corner(b, S * 0.82);
-        g.beginPath(); g.moveTo(x + cx2, y + cy2); g.lineTo(x + dx2, y + dy2); g.stroke();
+        const [a, b] = EDGE[d]; const [ax, ay] = corner(a, S), [bx, by2] = corner(b, S);
+        e.edge.moveTo(x + ax, y + ay); e.edge.lineTo(x + bx, y + by2); e.any = true;
       }
     }
+    g.save(); g.lineCap = 'square'; g.lineJoin = 'miter';
+    for (const [o, e] of by) {
+      const col = G.players[o].col;
+      g.fillStyle = rgba(col, 0.13); g.fill(e.area);
+      if (!e.any) continue;
+      g.save(); g.clip(e.area);
+      g.strokeStyle = 'rgba(255,250,235,0.7)'; g.lineWidth = 10; g.stroke(e.edge);
+      g.strokeStyle = rgba(col, 0.92); g.lineWidth = 6; g.stroke(e.edge);
+      g.restore();
+    }
+    g.restore();
   }
   drawOverlays(g) {
     // selected unit's reach / attack range / worked tiles of the open city
@@ -374,9 +382,11 @@ export class MapView {
       const key = spriteKey(G, u);
       const s = SPR[key];
       if (s && spr) {
-        const sc = inCity ? 1.0 : mil ? 1.25 : 0.95;
-        const w = 16 * sc, h = 24 * sc;
-        g.drawImage(spr, s[0] + frame * 16, s[1], 16, 24, Math.round((x - w / 2) * 4) / 4, y + r * 0.62 - h, w, h);
+        // whole screen pixels per sprite pixel, the sprite's corner on a whole screen pixel
+        const zd = this.z * this.dpr, kv = (inCity ? 1.0 : mil ? 1.25 : 0.95) * zd, k = kv < 0.75 ? kv : Math.max(1, Math.round(kv));
+        g.imageSmoothingEnabled = kv < 0.75;   // far out the sprite shrinks smoothly; otherwise whole pixels only
+        const w = 16 * k / zd, h = 24 * k / zd, ox = this.vw / 2 * this.dpr - this.cx * zd, snap = (v) => (Math.round(v * zd + ox) - ox) / zd;
+        g.drawImage(spr, s[0] + frame * 16, s[1], 16, 24, snap(x - w / 2), snap(y + r * 0.62 - h), w, h);
       }
       // health
       if (u.hp < 100) {
@@ -556,100 +566,106 @@ function makeCloud() {
   return c;
 }
 
+// Features sit on a fixed pattern inside each hex (the same slots in every hex of a kind, mirrored on alternate
+// hexes for variety), upright, at one size per kind, with one ink weight; nothing is jittered or rotated.
+const INKW = 1.3;
 function drawFeature(g, t, x, y, i, m) {
-  const r = (k) => hash(i, k);
+  const mir = ((i % m.w) + ((i / m.w) | 0)) % 2 ? -1 : 1;
+  g.lineCap = 'round'; g.lineJoin = 'round';
   switch (t) {
     case 'mountain': {
-      const peaks = [[-9, 6, 15, 20], [7, 8, 13, 17], [0, 2, 17, 26]];
-      for (const [dx, dy, hw, hh] of peaks) {
-        const px = x + dx + (r(dx + 40) - 0.5) * 4, py = y + dy + 4;
-        const gr = g.createLinearGradient(px - hw, 0, px + hw, 0);
-        gr.addColorStop(0, '#6e6a68'); gr.addColorStop(0.5, '#9a9590'); gr.addColorStop(0.55, '#c9c3b8'); gr.addColorStop(1, '#ddd6c8');
-        g.fillStyle = gr;
-        g.beginPath(); g.moveTo(px - hw, py); g.lineTo(px - hw * 0.25, py - hh * 0.8); g.lineTo(px, py - hh); g.lineTo(px + hw * 0.3, py - hh * 0.7); g.lineTo(px + hw, py); g.closePath(); g.fill();
-        g.strokeStyle = INK; g.lineWidth = 1.5; g.beginPath(); g.moveTo(px - hw, py); g.lineTo(px - hw * 0.25, py - hh * 0.8); g.lineTo(px, py - hh); g.lineTo(px + hw * 0.3, py - hh * 0.7); g.lineTo(px + hw * 0.8, py - hh * 0.15); g.stroke();
-        // texture strokes (cun)
-        g.strokeStyle = 'rgba(58,48,38,0.5)'; g.lineWidth = 0.9;
-        g.beginPath(); g.moveTo(px - 2, py - hh * 0.85); g.lineTo(px - hw * 0.4, py - 2); g.moveTo(px + 1, py - hh * 0.6); g.lineTo(px - hw * 0.1, py - 1); g.stroke();
-        const y0 = (i / m.w) | 0;
-        if (y0 < m.h * 0.3) { g.fillStyle = '#f8f8f4'; g.beginPath(); g.moveTo(px - hw * 0.3, py - hh * 0.75); g.lineTo(px, py - hh); g.lineTo(px + hw * 0.32, py - hh * 0.68); g.lineTo(px + 1, py - hh * 0.7); g.closePath(); g.fill(); }
-      }
+      const snowy = ((i / m.w) | 0) < m.h * 0.3;
+      for (const [dx, dy, hw, hh] of [[-10, 8, 12, 17], [10, 8, 12, 17], [0, 4, 15, 25]]) peak(g, x + dx * mir, y + dy, hw, hh, snowy);
       break;
     }
     case 'hills': {
-      for (const [dx, dy, w] of [[-8, 4, 13], [8, 7, 11]]) {
-        const px = x + dx + (r(dx + 3) - 0.5) * 5, py = y + dy;
+      for (const [dx, dy, w] of [[-8, 3, 12], [8, 9, 12]]) {
+        const px = x + dx * mir, py = y + dy;
         g.fillStyle = 'rgba(150,120,70,0.45)';
         g.beginPath(); g.moveTo(px - w, py); g.quadraticCurveTo(px, py - w * 1.1, px + w, py); g.closePath(); g.fill();
-        g.strokeStyle = INK; g.lineWidth = 1.3; g.beginPath(); g.moveTo(px - w, py); g.quadraticCurveTo(px, py - w * 1.1, px + w, py); g.stroke();
-        g.strokeStyle = 'rgba(58,48,38,0.4)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(px - w * 0.3, py - w * 0.4); g.quadraticCurveTo(px, py - w * 0.2, px + w * 0.2, py); g.stroke();
+        g.strokeStyle = INK; g.lineWidth = INKW; g.beginPath(); g.moveTo(px - w, py); g.quadraticCurveTo(px, py - w * 1.1, px + w, py); g.stroke();
+        g.strokeStyle = 'rgba(58,48,38,0.4)'; g.lineWidth = 0.8; g.beginPath(); g.moveTo(px - w * 0.35, py - w * 0.35); g.quadraticCurveTo(px - w * 0.05, py - w * 0.2, px + w * 0.15, py); g.stroke();
       }
       break;
     }
     case 'forest': {
-      const n = 5;
-      for (let k = 0; k < n; k++) {
-        const a = k / n * 6.28 + r(k) * 0.8, rr = k === 0 ? 0 : 11 + r(k + 9) * 4;
-        const px = x + Math.cos(a) * rr * (k ? 1 : 0), py = y + Math.sin(a) * rr * 0.7 * (k ? 1 : 0) + 2;
-        tree(g, px, py, 6 + r(k + 20) * 2.5);
-      }
+      // two rows: two pines at the back, three in front
+      for (const [dx, dy] of [[-8, -6], [8, -6], [-14, 6], [0, 7], [14, 6]]) pine(g, x + dx * mir, y + dy, 6.5);
       break;
     }
     case 'bamboo': {
-      for (let k = 0; k < 6; k++) {
-        const px = x - 13 + k * 5.2 + (r(k) - 0.5) * 3, py = y + 10 + (r(k + 7) - 0.5) * 4, hh = 18 + r(k + 3) * 8;
-        g.strokeStyle = '#4f7f35'; g.lineWidth = 1.8; g.beginPath(); g.moveTo(px, py); g.lineTo(px + 1, py - hh); g.stroke();
+      // five culms evenly spaced, heights from a fixed pattern
+      const hs = mir > 0 ? [20, 26, 22, 27, 21] : [22, 27, 21, 26, 20];
+      for (let k = 0; k < 5; k++) {
+        const px = x - 12 + k * 6, py = y + 11, hh = hs[k];
+        g.strokeStyle = '#4f7f35'; g.lineWidth = 2; g.beginPath(); g.moveTo(px, py); g.lineTo(px, py - hh); g.stroke();
         g.strokeStyle = '#2f4f22'; g.lineWidth = 1;
-        for (let j = 1; j < 4; j++) { g.beginPath(); g.moveTo(px - 1.2, py - hh * j / 4); g.lineTo(px + 1.6, py - hh * j / 4); g.stroke(); }
-        g.fillStyle = 'rgba(70,120,50,0.85)';
-        for (let j = 0; j < 2; j++) { const ly = py - hh * (0.6 + j * 0.3); g.beginPath(); g.ellipse(px + (j ? -4 : 4), ly, 4.5, 1.4, j ? 0.5 : -0.5, 0, 6.29); g.fill(); }
+        for (let yy = py - 6; yy > py - hh + 2; yy -= 6) { g.beginPath(); g.moveTo(px - 1.3, yy); g.lineTo(px + 1.3, yy); g.stroke(); }
+        g.fillStyle = 'rgba(70,120,50,0.9)'; const side = k % 2 ? -1 : 1, ly = py - hh + 3;
+        g.beginPath(); g.moveTo(px, ly); g.lineTo(px + side * 6, ly - 2); g.lineTo(px + side * 1, ly + 1.5); g.closePath(); g.fill();
       }
       break;
     }
     case 'marsh': {
       g.fillStyle = 'rgba(110,160,170,0.5)';
-      g.beginPath(); g.ellipse(x - 6, y + 6, 9, 3.5, 0, 0, 6.29); g.fill(); g.beginPath(); g.ellipse(x + 9, y - 4, 7, 2.6, 0, 0, 6.29); g.fill();
-      g.strokeStyle = '#4a6a3a'; g.lineWidth = 1;
-      for (let k = 0; k < 7; k++) { const px = x - 14 + k * 4.5, py = y + 2 + (r(k) - 0.5) * 10; g.beginPath(); g.moveTo(px, py); g.lineTo(px - 2 + r(k + 1) * 4, py - 8); g.stroke(); }
+      g.beginPath(); g.ellipse(x - 7 * mir, y + 7, 9, 3, 0, 0, 6.29); g.fill(); g.beginPath(); g.ellipse(x + 8 * mir, y - 3, 7, 2.5, 0, 0, 6.29); g.fill();
+      g.strokeStyle = '#4a6a3a'; g.lineWidth = 1.1;
+      for (const [dx, dy] of [[-12, 0], [-8, -1], [4, 9], [8, 8], [12, 9]]) { const px = x + dx * mir, py = y + dy; g.beginPath(); g.moveTo(px, py); g.lineTo(px, py - 8); g.moveTo(px, py - 3); g.lineTo(px + 2.5, py - 7); g.stroke(); }
       break;
     }
     case 'snow': {
       g.strokeStyle = 'rgba(120,150,180,0.5)'; g.lineWidth = 1;
-      for (let k = 0; k < 3; k++) { const px = x + (r(k) - 0.5) * 30, py = y + (r(k + 4) - 0.5) * 22; g.beginPath(); g.moveTo(px - 6, py); g.quadraticCurveTo(px, py - 3, px + 6, py); g.stroke(); }
+      for (const [dx, dy] of [[-9, -6], [9, -1], [-3, 9]]) { const px = x + dx * mir, py = y + dy; g.beginPath(); g.moveTo(px - 6, py); g.quadraticCurveTo(px, py - 3, px + 6, py); g.stroke(); }
       break;
     }
     case 'desert': {
       g.fillStyle = 'rgba(160,120,60,0.5)';
-      for (let k = 0; k < 9; k++) { g.beginPath(); g.arc(x + (r(k) - 0.5) * 34, y + (r(k + 11) - 0.5) * 26, 0.9, 0, 6.29); g.fill(); }
+      for (const [dx, dy] of [[-12, -8], [0, -10], [12, -8], [-6, 0], [6, 0], [-12, 9], [12, 9]]) { g.beginPath(); g.arc(x + dx, y + dy, 1, 0, 6.29); g.fill(); }
       g.strokeStyle = 'rgba(150,110,50,0.55)'; g.lineWidth = 1;
-      g.beginPath(); g.moveTo(x - 12, y + 6); g.quadraticCurveTo(x - 2, y - 2, x + 10, y + 5); g.stroke();
+      g.beginPath(); g.moveTo(x - 11, y + 6); g.quadraticCurveTo(x, y - 1, x + 11, y + 6); g.stroke();
       break;
     }
     case 'grass': case 'plains': {
-      g.strokeStyle = t === 'grass' ? 'rgba(70,110,40,0.55)' : 'rgba(130,110,50,0.5)'; g.lineWidth = 0.9;
-      for (let k = 0; k < 3; k++) { const px = x + (r(k) - 0.5) * 30, py = y + (r(k + 6) - 0.5) * 24; g.beginPath(); g.moveTo(px - 3, py); g.lineTo(px - 1, py - 4); g.moveTo(px, py); g.lineTo(px, py - 5); g.moveTo(px + 3, py); g.lineTo(px + 1.5, py - 4); g.stroke(); }
+      g.strokeStyle = t === 'grass' ? 'rgba(70,110,40,0.55)' : 'rgba(130,110,50,0.5)'; g.lineWidth = 1;
+      for (const [dx, dy] of [[-10, -5], [10, -5], [0, 9]]) { const px = x + dx * mir, py = y + dy; g.beginPath(); g.moveTo(px - 3, py); g.lineTo(px - 1.5, py - 4); g.moveTo(px, py); g.lineTo(px, py - 5); g.moveTo(px + 3, py); g.lineTo(px + 1.5, py - 4); g.stroke(); }
       break;
     }
   }
 }
-function tree(g, x, y, s) {
-  g.strokeStyle = '#5a3e26'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(x, y + s * 0.4); g.lineTo(x, y + s * 1.1); g.stroke();
-  g.fillStyle = '#4e7a3f'; g.beginPath(); g.arc(x, y, s, 0, 6.29); g.fill();
-  g.fillStyle = 'rgba(160,200,110,0.55)'; g.beginPath(); g.arc(x - s * 0.3, y - s * 0.35, s * 0.5, 0, 6.29); g.fill();
-  g.strokeStyle = '#2c3f22'; g.lineWidth = 1; g.beginPath(); g.arc(x, y, s, 0.2, 3.6); g.stroke();
+// an ink-wash peak: shaded faces, one ink outline, two texture strokes, a snow cap when asked
+function peak(g, px, py, hw, hh, snowy) {
+  const gr = g.createLinearGradient(px - hw, 0, px + hw, 0);
+  gr.addColorStop(0, '#6e6a68'); gr.addColorStop(0.5, '#9a9590'); gr.addColorStop(0.52, '#c9c3b8'); gr.addColorStop(1, '#ddd6c8');
+  g.fillStyle = gr;
+  g.beginPath(); g.moveTo(px - hw, py); g.lineTo(px, py - hh); g.lineTo(px + hw, py); g.closePath(); g.fill();
+  g.strokeStyle = INK; g.lineWidth = INKW; g.beginPath(); g.moveTo(px - hw, py); g.lineTo(px, py - hh); g.lineTo(px + hw, py); g.stroke();
+  g.strokeStyle = 'rgba(58,48,38,0.45)'; g.lineWidth = 0.9;
+  g.beginPath(); g.moveTo(px, py - hh * 0.8); g.lineTo(px - hw * 0.35, py - 2); g.moveTo(px, py - hh * 0.45); g.lineTo(px - hw * 0.12, py - 1); g.stroke();
+  if (snowy) { g.fillStyle = '#f8f8f4'; g.beginPath(); g.moveTo(px - hw * 0.3, py - hh * 0.7); g.lineTo(px, py - hh); g.lineTo(px + hw * 0.3, py - hh * 0.7); g.lineTo(px, py - hh * 0.78); g.closePath(); g.fill(); g.strokeStyle = INK; g.lineWidth = INKW; g.beginPath(); g.moveTo(px - hw * 0.3, py - hh * 0.7); g.lineTo(px, py - hh); g.lineTo(px + hw * 0.3, py - hh * 0.7); g.stroke(); }
+}
+// a painted pine: straight trunk, three level tiers, one ink outline
+function pine(g, x, y, s) {
+  g.strokeStyle = '#5a3e26'; g.lineWidth = 1.6; g.beginPath(); g.moveTo(x, y + s * 0.2); g.lineTo(x, y + s * 1.2); g.stroke();
+  for (let k = 0; k < 3; k++) {
+    const w = s * (1.25 - k * 0.3), ty = y + s * 0.3 - k * s * 0.55;
+    g.fillStyle = k === 2 ? '#5f8f4a' : k === 1 ? '#557f42' : '#4a6f3a';
+    g.beginPath(); g.moveTo(x - w, ty); g.lineTo(x, ty - s * 0.75); g.lineTo(x + w, ty); g.closePath(); g.fill();
+    g.strokeStyle = '#2c3f22'; g.lineWidth = 1; g.stroke();
+  }
 }
 function drawImprovement(g, k, x, y, i) {
   g.lineWidth = 1;
   if (k === 'farm') {
-    g.strokeStyle = 'rgba(120,90,30,0.55)';
-    for (let j = -2; j <= 2; j++) { g.beginPath(); g.moveTo(x - 14, y + j * 5 + 2); g.lineTo(x + 14, y + j * 5 - 2); g.stroke(); }
-    g.fillStyle = 'rgba(220,190,80,0.35)'; g.beginPath(); g.ellipse(x, y, 16, 11, -0.15, 0, 6.29); g.fill();
+    // a paddy: level furrows inside a squared field with a raised bund
+    g.fillStyle = 'rgba(220,190,80,0.32)'; g.fillRect(x - 15, y - 10, 30, 20);
+    g.strokeStyle = 'rgba(120,90,30,0.6)'; g.strokeRect(x - 15, y - 10, 30, 20);
+    for (let j = -1; j <= 1; j++) { g.beginPath(); g.moveTo(x - 13, y + j * 5); g.lineTo(x + 13, y + j * 5); g.stroke(); }
   } else if (k === 'mine') {
     g.fillStyle = '#3a3026'; g.beginPath(); g.arc(x - 12, y + 12, 4, Math.PI, 0); g.fill();
     g.strokeStyle = '#6a5030'; g.lineWidth = 1.5; g.beginPath(); g.moveTo(x - 17, y + 13); g.lineTo(x - 7, y + 13); g.stroke();
   } else if (k === 'lumber') {
     g.fillStyle = '#8a5a30'; g.strokeStyle = '#4a3018';
-    for (let j = 0; j < 3; j++) { g.beginPath(); g.ellipse(x - 12 + j * 3, y + 14 - j * 2, 5, 1.8, 0, 0, 6.29); g.fill(); g.stroke(); }
+    for (const [dx, dy] of [[-16, 15], [-8, 15], [-12, 11]]) { g.beginPath(); g.ellipse(x + dx, y + dy, 4, 1.8, 0, 0, 6.29); g.fill(); g.stroke(); }
   } else if (k === 'garden') {
     g.fillStyle = 'rgba(90,140,60,0.5)';
     for (let j = 0; j < 4; j++) for (let q = 0; q < 2; q++) { g.beginPath(); g.arc(x - 10 + j * 6, y + 10 + q * 5, 1.8, 0, 6.29); g.fill(); }

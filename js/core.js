@@ -4,10 +4,10 @@ import {
   TERRAIN, TERRAIN_IDS, TID, RESOURCES, RES_IDS, IMPROVEMENTS, IMP_IDS, SECTS, SECT_IDS, UNITS, BUILDINGS, WONDERS,
   PROJECTS, TECHS, TECH_IDS, CIVICS, CIVIC_IDS, GOVS, POLICIES, HEROES, GREAT, GP_KEYS, VILLAGE_KINDS, VILLAGES, ENVOY_TIERS,
   DIFFICULTY, SIZES, SPEEDS, LEADER_HERO, ERAS, XP_LEVELS,
-} from './data.js?v=1';
-import { generate } from './mapgen.js?v=1';
-import { neighbours, within, dist } from './hex.js?v=1';
-import { rnd, rint, shuffle, makeRng, hashStr } from './rng.js?v=1';
+} from './data.js?v=2';
+import { generate } from './mapgen.js?v=2';
+import { neighbours, within, dist } from './hex.js?v=2';
+import { rnd, rint, shuffle, makeRng, hashStr } from './rng.js?v=2';
 
 export const VERSION = 1;
 export const NEUTRAL = -1;
