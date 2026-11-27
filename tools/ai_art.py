@@ -60,7 +60,8 @@ def main():
             continue
         if not all(views):
             continue
-        views[1] = views[1].transpose(Image.FLIP_LEFT_RIGHT)   # painted looking left; stored facing right
+        if k not in ai_chibi.PAINTED_RIGHT:
+            views[1] = views[1].transpose(Image.FLIP_LEFT_RIGHT)   # painted looking left; stored facing right
         strips.append((k, views))
     sheet = Image.new('RGBA', (CW * 3 * SCOLS, CH * max(1, (len(strips) + SCOLS - 1) // SCOLS)))
     for n, (k, views) in enumerate(strips):

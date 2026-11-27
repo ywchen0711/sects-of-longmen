@@ -24,7 +24,7 @@ class App {
     setLang(getLang());
     const load = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
     const [sprites, portraits, aiSprites, aiPortraits] = await Promise.all([load('assets/sprites.png?v=1'), load('assets/portraits.png?v=1'),
-      load('assets/ai/sprites.webp?v=cb6085c0'), load('assets/ai/portraits.webp?v=b44e7175')]);
+      load('assets/ai/sprites.webp?v=c74d3402'), load('assets/ai/portraits.webp?v=b44e7175')]);
     this.view = new MapView($('#map'), { sprites, portraits, aiSprites, aiPortraits });
     this.view.anim = this.settings.anim;
     this.ui = new UI(this);
