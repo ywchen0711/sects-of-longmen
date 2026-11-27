@@ -4,15 +4,15 @@ import {
   SECTS, SECT_IDS, UNITS, BUILDINGS, WONDERS, PROJECTS, TECHS, CIVICS, GOVS, POLICIES, SLOT_NAMES, HEROES, GREAT, GP_KEYS, VILLAGE_KINDS,
   RESOLUTIONS, ALIGN, DIFFICULTY, SIZES, MAPTYPES, SPEEDS, VICTORIES, TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMPROVEMENTS, IMP_IDS,
   ERAS, SEASONS, PROMOS, YNAME, ENVOY_TIERS, LEADER_HERO,
-} from './data.js?v=3';
-import * as C from './core.js?v=3';
-import * as U from './units.js?v=3';
-import * as W from './world.js?v=3';
-import { aiTurn } from './ai.js?v=3';
-import { L, T, getLang, setLang } from './i18n.js?v=3';
-import { KEY } from './art.js?v=3';
-import { spriteKey, rgba } from './render.js?v=3';
-import { dist, within } from './hex.js?v=3';
+} from './data.js?v=4';
+import * as C from './core.js?v=4';
+import * as U from './units.js?v=4';
+import * as W from './world.js?v=4';
+import { aiTurn } from './ai.js?v=4';
+import { L, T, getLang, setLang } from './i18n.js?v=4';
+import { KEY } from './art.js?v=4';
+import { spriteKey, rgba } from './render.js?v=4';
+import { dist, within } from './hex.js?v=4';
 
 const $ = (s, r = document) => r.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));

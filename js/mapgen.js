@@ -1,8 +1,8 @@
 // Seeded hex map generator: land shape, relief, climate (cold north, dry west, warm wet south),
 // rivers running downhill, lakes, resources, start sites, villages and camps.
-import { TID, TERRAIN_IDS, TERRAIN, RESOURCES, RES_IDS } from './data.js?v=3';
-import { makeRng, makeNoise, rnd, rint, shuffle } from './rng.js?v=3';
-import { neighbours, dirTable, dist, within } from './hex.js?v=3';
+import { TID, TERRAIN_IDS, TERRAIN, RESOURCES, RES_IDS } from './data.js?v=4';
+import { makeRng, makeNoise, rnd, rint, shuffle } from './rng.js?v=4';
+import { neighbours, dirTable, dist, within } from './hex.js?v=4';
 
 export function generate(opt) {
   const { w, h, seed, type = 'pangaea', players = 4, villages = 4, camps = 5 } = opt;

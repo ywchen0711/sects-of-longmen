@@ -1,13 +1,15 @@
 // The map: an ink-and-colour painted scroll. Terrain is painted once into cached chunks (per zoom bucket);
 // fog, borders, cities, units and effects are drawn on top only when something changes or animates.
-import { TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMP_IDS, SECTS, UNITS, BUILDINGS } from './data.js?v=3';
-import { center, corner, pick, EDGE, SQ3, dirTable } from './hex.js?v=3';
-import { cityAt, unitsAt, udef, isMilitary, tileOwner, heroDef, resVisible, cityMaxHp, cityTiles } from './core.js?v=3';
-import { KEY, SPR, POR } from './art.js?v=3';
-import { L } from './i18n.js?v=3';
+import { TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMP_IDS, SECTS, UNITS, BUILDINGS } from './data.js?v=4';
+import { center, corner, pick, EDGE, SQ3, dirTable } from './hex.js?v=4';
+import { cityAt, unitsAt, udef, isMilitary, tileOwner, heroDef, resVisible, cityMaxHp, cityTiles } from './core.js?v=4';
+import { KEY, SPR, POR } from './art.js?v=4';
+import { AI } from './ai_art.js?v=81999887';
+import { L } from './i18n.js?v=4';
 
 export const S = 32;            // hex radius in map units
 const CH = 512;                  // chunk size in map units
+const AW = 108, AH = 124, AFIG = 120;   // painted map figures (tools/ai_art.py): cell size, figure height
 const BUCKETS = [0.25, 0.5, 1, 1.5, 2, 3];
 
 const PAL = {
@@ -380,8 +382,28 @@ export class MapView {
       if (u.owner < 0) { g.lineWidth = 1; g.strokeStyle = '#a01818'; g.beginPath(); g.arc(x, y, r - 2.5, 0, 6.29); g.stroke(); }
       // sprite
       const key = spriteKey(G, u);
-      const s = SPR[key];
-      if (s && spr) {
+      const s = SPR[key], ai = AI[key] && AI[key].s;
+      if (ai && this.img.aiSprites) {
+        // painted figure, drawn smoothed: front at rest, side or back while walking, side towards its foe in a fight
+        const hit = this.fx.find((f) => f.id === u.id && (f.k === 'lunge' || f.k === 'arrow') && now >= f.t0 && now - f.t0 < f.d);
+        let view = 0, flip = false, lx = 0, ly = 0, bob = 0;
+        const face = (dx, dy) => { if (Math.abs(dx) >= Math.abs(dy) * 0.6) { view = 1; flip = dx < 0; } else view = dy < 0 ? 2 : 0; };
+        if (hit) {
+          face(hit.bx - hit.ax, hit.by - hit.ay);
+          if (view !== 1 && hit.bx !== hit.ax) { view = 1; flip = hit.bx < hit.ax; }
+          if (hit.k === 'lunge') { const t = Math.sin((now - hit.t0) / hit.d * Math.PI) * 0.4; lx = (hit.bx - hit.ax) * t; ly = (hit.by - hit.ay) * t; }
+        } else if (d.x !== d.tx || d.y !== d.ty) {
+          face(d.tx - d.fx, d.ty - d.fy);
+          bob = Math.abs(Math.sin((now - d.t0) / 110)) * 1.6;
+        }
+        const fh = inCity ? 27 : mil ? 34 : 26, k = fh / AFIG, w = AW * k, h = AH * k;
+        const fx = x + lx, fy = y + r * 0.62 + ly - bob + 2 * k;
+        g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
+        g.save(); g.translate(fx, fy); if (flip) g.scale(-1, 1);
+        g.drawImage(this.img.aiSprites, ai[0] + view * AW, ai[1], AW, AH, -w / 2, -h, w, h);
+        g.restore();
+        if (hit) busy = true;
+      } else if (s && spr) {
         // whole screen pixels per sprite pixel, the sprite's corner on a whole screen pixel
         const zd = this.z * this.dpr, kv = (inCity ? 1.0 : mil ? 1.25 : 0.95) * zd, k = kv < 0.75 ? kv : Math.max(1, Math.round(kv));
         g.imageSmoothingEnabled = kv < 0.75;   // far out the sprite shrinks smoothly; otherwise whole pixels only
@@ -468,7 +490,7 @@ export class MapView {
     if (!vis(ev.at) && !vis(ev.from)) return;
     const now = performance.now();
     const [ax, ay] = this.tileXY(ev.from), [bx, by] = this.tileXY(ev.at);
-    if (ev.kind === 'ranged') this.fx.push({ k: 'arrow', ax, ay, bx, by, t0: now, d: 380 });
+    if (ev.kind === 'ranged') this.fx.push({ k: 'arrow', id: ev.a, ax, ay, bx, by, t0: now, d: 380 });
     else this.fx.push({ k: 'lunge', id: ev.a, ax, ay, bx, by, t0: now, d: 300 });
     this.fx.push({ k: 'slash', x: bx, y: by, t0: now + (ev.kind === 'ranged' ? 330 : 150), d: 380 });
     if (ev.dmgD) this.fx.push({ k: 'num', x: bx, y: by - 10, s: '-' + ev.dmgD, c: '#d02818', t0: now + 200, d: 1100 });
@@ -508,10 +530,19 @@ export class MapView {
   portraitURL(key) {
     if (!this._pc) this._pc = new Map();
     if (this._pc.has(key)) return this._pc.get(key);
-    const pos = POR[KEY[key] || key]; if (!pos || !this.img.portraits) return '';
-    const c = document.createElement('canvas'); c.width = 96; c.height = 112;
-    const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
-    g.drawImage(this.img.portraits, pos[0], pos[1], 48, 56, 0, 0, 96, 112);
+    const id = KEY[key] || key, ai = AI[id] && AI[id].p, pos = POR[id];
+    const c = document.createElement('canvas'); c.width = 192; c.height = 224;
+    const g = c.getContext('2d');
+    if (ai && this.img.aiPortraits) {
+      // the painted bust (tools/ai_art.py) on a warm paper wash, kept at its full 192 x 224 so it stays sharp
+      const bg = g.createRadialGradient(96, 90, 20, 96, 112, 150); bg.addColorStop(0, '#f6ecd4'); bg.addColorStop(1, '#c9b48a');
+      g.fillStyle = bg; g.fillRect(0, 0, 192, 224);
+      g.drawImage(this.img.aiPortraits, ai[0], ai[1], 192, 224, 0, 0, 192, 224);
+    } else {
+      if (!pos || !this.img.portraits) return '';
+      g.imageSmoothingEnabled = false;   // the pixel bust in whole 4x pixels, so it stays crisp when the page scales it down
+      g.drawImage(this.img.portraits, pos[0], pos[1], 48, 56, 0, 0, 192, 224);
+    }
     const url = c.toDataURL(); this._pc.set(key, url); return url;
   }
   spriteURL(key, scale = 3) {

@@ -14,6 +14,12 @@ interface, art, text, trees, leaders, wonders or music of any existing game.
   the title scroll are painted by code in `js/render.js` and `js/main.js`.
 - The app icon and thumbnail lettering use the Windows font 標楷體 (DFKai-SB) and Noto Serif TC to render the images.
 
+## AI-painted portraits and map figures
+The portraits and the painted map figures in `assets/ai/` were painted on a local GPU with
+[Animagine XL 4.0](https://huggingface.co/cagliostrolab/animagine-xl-4.0) (CreativeML Open RAIL++-M), from prompts
+written for each character in Longmen Tactics (`C:\LongmenTactics\tools\ai_tags.py`), and brought in with
+`tools/ai_art.py`. Characters not painted yet keep their pixel art.
+
 ## Music and sound
 Original compositions written for the game (`tools/score.py`: every melody, chord, bass line and drum pattern),
 played by a sampler (`tools/orch.py`, adapted from the same author's Longmen Quest II tools) with recorded

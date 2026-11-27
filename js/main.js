@@ -1,13 +1,13 @@
 // Boot: assets, title and setup screens, saves, settings, map input and the render loop.
-import { SECTS, SECT_IDS, UNITS, BUILDINGS, DIFFICULTY, SIZES, MAPTYPES, SPEEDS, VICTORIES, ALIGN } from './data.js?v=3';
-import * as C from './core.js?v=3';
-import * as W from './world.js?v=3';
-import * as U from './units.js?v=3';
-import { aiTurn } from './ai.js?v=3';
-import { MapView } from './render.js?v=3';
-import { UI } from './ui.js?v=3';
-import { Sound } from './audio.js?v=3';
-import { L, T, getLang, setLang } from './i18n.js?v=3';
+import { SECTS, SECT_IDS, UNITS, BUILDINGS, DIFFICULTY, SIZES, MAPTYPES, SPEEDS, VICTORIES, ALIGN } from './data.js?v=4';
+import * as C from './core.js?v=4';
+import * as W from './world.js?v=4';
+import * as U from './units.js?v=4';
+import { aiTurn } from './ai.js?v=4';
+import { MapView } from './render.js?v=4';
+import { UI } from './ui.js?v=4';
+import { Sound } from './audio.js?v=4';
+import { L, T, getLang, setLang } from './i18n.js?v=4';
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -23,8 +23,9 @@ class App {
   async boot() {
     setLang(getLang());
     const load = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = src; });
-    const [sprites, portraits] = await Promise.all([load('assets/sprites.png?v=1'), load('assets/portraits.png?v=1')]);
-    this.view = new MapView($('#map'), { sprites, portraits });
+    const [sprites, portraits, aiSprites, aiPortraits] = await Promise.all([load('assets/sprites.png?v=1'), load('assets/portraits.png?v=1'),
+      load('assets/ai/sprites.webp?v=cb6085c0'), load('assets/ai/portraits.webp?v=b44e7175')]);
+    this.view = new MapView($('#map'), { sprites, portraits, aiSprites, aiPortraits });
     this.view.anim = this.settings.anim;
     this.ui = new UI(this);
     this.bindInput();
