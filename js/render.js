@@ -4,7 +4,7 @@ import { TERRAIN, TERRAIN_IDS, RESOURCES, RES_IDS, IMP_IDS, SECTS, UNITS, BUILDI
 import { center, corner, pick, EDGE, SQ3, dirTable } from './hex.js?v=4';
 import { cityAt, unitsAt, udef, isMilitary, tileOwner, heroDef, resVisible, cityMaxHp, cityTiles } from './core.js?v=4';
 import { KEY, SPR, POR } from './art.js?v=4';
-import { AI } from './ai_art.js?v=63a31ae9';
+import { AI } from './ai_art.js?v=7aeeeec2';
 import { L } from './i18n.js?v=4';
 
 export const S = 32;            // hex radius in map units
